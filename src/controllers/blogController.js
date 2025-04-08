@@ -84,13 +84,7 @@ const deleteBlog = asyncHandler(async (req,res)=>{
     console.log("error in delete post controller" , error.message)
     res.status(500).json({message:"Internal server error"})
   }
-    
-  
-  
-    
   });
-
-
   module.exports = {
     getBlogs,
     getBlog,
