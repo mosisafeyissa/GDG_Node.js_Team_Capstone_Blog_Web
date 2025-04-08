@@ -1,3 +1,4 @@
+//path to this file is src/controllers/blogController.js
 const asyncHandler =require("express-async-handler");
 const blog = require("../models/BlogPost")
 //desc get all blogs
@@ -39,7 +40,7 @@ const createBlog = asyncHandler(async (req,res)=>{
       title,
       content,
       category,
-      
+      author: req.userId,
     });
     res.status(201).json(blogs);
   });

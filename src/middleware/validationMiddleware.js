@@ -1,3 +1,4 @@
+// path to this file is src/middleware/validationMiddleware.js
 const { body, validationResult } = require('express-validator');
 
 // Validate user registration/login inputs

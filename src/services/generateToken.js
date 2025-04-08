@@ -1,3 +1,4 @@
+//path to this file is src/routes/userRoutes.js
 const jwt = require('jsonwebtoken');
 
 // Generate a JWT token for user authentication

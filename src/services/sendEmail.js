@@ -1,3 +1,4 @@
+//path to this file is src/services/generatePasswordResetToken.js
 const crypto = require('crypto');
 
 const generatePasswordResetToken = () => {

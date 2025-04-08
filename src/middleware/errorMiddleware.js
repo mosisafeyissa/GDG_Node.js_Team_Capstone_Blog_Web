@@ -1,3 +1,4 @@
+// path to this file is src/middleware/errorMiddleware.js
 const errorHandler = (err, req, res, next) => {
   console.error(err.stack); // Log the error for debugging
 

@@ -1,3 +1,4 @@
+// path to this file is src/models/BlogPost.js
 const mongoose = require('mongoose');
 
 const blogPostSchema = new mongoose.Schema({

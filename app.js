@@ -1,3 +1,4 @@
+// path to this file is app.js
 require('dotenv').config();
 const express = require('express');
 const connectDB = require('./src/config/db');
@@ -8,6 +9,7 @@ const port = process.env.PORT || 3000;
 connectDB();
 
 app.use(express.json());
+app.use("/api/auth", require("./src/routes/authRoutes"));
 app.use("/api/posts", require("./src/routes/blogRoutes"));
 
 
