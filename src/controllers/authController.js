@@ -9,6 +9,7 @@ const {
   generatePasswordResetToken,
 } = require("../services/sendEmail");
 const sendEmail = require("../services/sendEmail");
+const CustomError = require("../utils/CustomError"); // Import the CustomError class
 
 
 // @desc    Register a new user
@@ -230,6 +231,40 @@ const googleLogin = async (req, res, next) => {
 
 
 
+const updateProfile = async (req, res, next) => {
+  const { username } = req.body;
+
+  // Validate that username is provided
+  if (!username) {
+    return next(new CustomError("Username is required", 400)); // Bad request
+  }
+
+  try {
+    // Find the user in the database and update the username
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user, // The user ID from the token
+      { username }, // Only update the username
+      { new: true, runValidators: true } // Return the updated user and run validators
+    );
+
+    if (!updatedUser) {
+      return next(new CustomError("User not found", 404)); // User not found
+    }
+
+    // Return the updated profile
+    res.status(200).json({
+      updatedProfile: {
+        userId: updatedUser._id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+      },
+    });
+  } catch (err) {
+    next(err); // Pass any errors to error handler
+  }
+};
+
+
 // check about custome error handling sing we are using it here      in the above functions.
 
 
@@ -241,4 +276,5 @@ module.exports = {
   requestPasswordReset,
   resetPassword,
   googleLogin,
+  updateProfile,
 };
