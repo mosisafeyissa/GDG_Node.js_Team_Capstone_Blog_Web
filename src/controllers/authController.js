@@ -5,6 +5,10 @@ const crypto = require("crypto");
 const User = require("../models/User");
 const PasswordResetToken = require("../models/PasswordResetToken");
 const { OAuth2Client } = require("google-auth-library");
+const bcrypt = require("bcryptjs");
+const { validationResult } = require("express-validator");
+
+
 const {
   generatePasswordResetToken,
 } = require("../services/sendEmail");
@@ -15,67 +19,112 @@ const CustomError = require("../utils/CustomError"); // Import the CustomError c
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
+
 const registerUser = asyncHandler(async (req, res) => {
   const { email, username, password } = req.body;
 
-  // Check if user already exists
-  const userExists = await User.findOne({ email });
-  if (userExists) {
-    res.status(400);
-    throw new Error("User already exists with this email");
+  // Validate input fields
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    throw new CustomError("Enter valid inputs", 400, errors.array());
   }
 
-  // Create the user
-  const user = await User.create({ email, username, password });
+  // Check if email or username already exists
+  const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+  if (existingUser) {
+    throw new CustomError("An account already exists for this email address.", 400);
+  }
 
-  if (user) {
+  // Hash the password
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = bcrypt.hashSync(password, salt);
+
+  // Create and save the user
+  const newUser = new User({
+    email,
+    username,
+    password: hashedPassword,
+  });
+
+  try {
+    await newUser.save();
     res.status(201).json({
-      userId: user._id,
+      userId: newUser._id,
       message: "User registered successfully",
     });
-  } else {
-    res.status(400);
-    throw new Error("Invalid user data");
+  } catch (err) {
+    throw new CustomError("Server error during registration", 500);
   }
 });
+
+
 
 // @desc    Login a user
 // @route   POST /api/auth/login
 // @access  Public
+
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  // 1. Find user by email
-  const user = await User.findOne({ email });
-  if (!user) {
-    res.status(401);
-    throw new Error("Invalid email or password");
+  // Validate input fields
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    throw new CustomError("Enter valid Inputs", 400, errors.array());
   }
 
-  // 2. Compare password
-  const isMatch = await user.comparePassword(password);
-  if (!isMatch) {
-    res.status(401);
-    throw new Error("Invalid email or password");
+  try {
+    // Step 1: Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new CustomError("User doesn't exist", 401);
+    }
+
+    // Step 2: Compare password
+    const passwordIsValid = bcrypt.compareSync(password, user.password);
+    if (!passwordIsValid) {
+      return res.status(401).json({ message: "Incorrect password." });
+    }
+
+    // Step 3: Generate JWT token
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    // Step 4: Send response with token
+    res.status(200).json({ token });
+  } catch (err) {
+    // Handle known errors (CustomError)
+    if (err instanceof CustomError) {
+      res.status(err.statusCode || 400).json({ message: err.message });
+    } else {
+      // Catch other errors (e.g., server errors)
+      console.error(err);
+      res
+        .status(500)
+        .json({ message: "Server error. Please try again later." });
+    }
   }
-
-  // 3. Generate JWT token
-  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-    expiresIn: "1h",
-  });
-
-  // 4. Respond with token
-  res.status(200).json({ token });
 });
 
-const logoutUser = (req, res) => {
-  // You could also handle blacklisting the token here if you implement it
-  res.status(200).json({ message: "User logged out successfully" });
-};
+
+// @desc    Logout a user
+// @route   POST /api/auth/logout
+
+const logoutUser = asyncHandler(async (req, res) => {
+
+  try {
+    res.status(200).json({ message: "Logged out successfully." });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ message: "Unexpected error, Please try again later." });
+  }
+});
 
 const sendPasswordResetEmail = async (user, token) => {
   const transporter = nodemailer.createTransport({
-    service: "gmail", // Use your preferred email service
+    service: "gmail", 
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
@@ -104,170 +153,125 @@ const requestPasswordReset = async (req, res, next) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    // Generate a token and store it in the PasswordResetToken collection
-    const token = crypto.randomBytes(20).toString("hex");
-    const expiresAt = Date.now() + 3600000; // 1 hour expiration time
+    // Delete existing token if it exists
+    await PasswordResetToken.deleteMany({ userId: user._id });
 
-    const resetToken = new PasswordResetToken({
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
+
+    const expiresAt = Date.now() + 60 * 60 * 1000; // 1 hour
+
+    await PasswordResetToken.create({
       userId: user._id,
-      token,
+      token: hashedToken,
       expiresAt,
     });
 
-    await resetToken.save();
-
-    // Send the password reset email
-    await sendPasswordResetEmail(user, token);
+    await sendPasswordResetEmail(user, rawToken); // send raw token via email
 
     res.status(200).json({ message: "Password reset email sent" });
   } catch (err) {
     console.error(err);
-    next(err); // Forward error to error handler
+    next(err);
   }
 };
 
 const resetPassword = async (req, res, next) => {
   const { token, newPassword } = req.body;
 
-  // 1. Validate Input: Check if token and new password are provided.
   if (!token || !newPassword) {
     return res
       .status(400)
       .json({ message: "Token and new password are required" });
   }
 
-  try {
-    // 2. Check if the token exists in the PasswordResetToken collection.
-    const resetToken = await PasswordResetToken.findOne({ token });
+  if (newPassword.length < 6) {
+    return res
+      .status(400)
+      .json({ message: "Password must be at least 6 characters long" });
+  }
 
-    if (!resetToken) {
-      // Token doesn't exist, send error response
+  try {
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const resetTokenDoc = await PasswordResetToken.findOne({
+      token: hashedToken,
+      expiresAt: { $gt: Date.now() },
+    });
+
+    if (!resetTokenDoc) {
       return res.status(400).json({ message: "Invalid or expired token" });
     }
 
-    // 3. Check if the token has expired.
-    if (resetToken.expiresAt < Date.now()) {
-      // Token has expired, send error response
-      return res.status(400).json({ message: "Token has expired" });
-    }
-
-    // 4. Find the user associated with the token.
-    const user = await User.findById(resetToken.userId);
+    const user = await User.findById(resetTokenDoc.userId);
     if (!user) {
-      // User not found, send error response
-      return res.status(400).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    // 5. Hash the new password before saving it.
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-    // 6. Update the user's password with the new hashed password.
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
     await user.save();
 
-    // 7. Delete the reset token from the database after successful password reset.
-    await PasswordResetToken.deleteOne({ token });
+    await PasswordResetToken.deleteOne({ _id: resetTokenDoc._id });
 
-    // 8. Respond with success message.
     res.status(200).json({ message: "Password reset successfully" });
   } catch (err) {
     console.error(err);
-    next(err); // Pass the error to the error handler
+    next(err);
   }
 };
 
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-const googleLogin = async (req, res, next) => {
+const googleLogin = asyncHandler(async (req, res, next) => {
   const { accessToken } = req.body; // The access token sent by the frontend
 
   if (!accessToken) {
-    return next(new CustomError("Access token is required", 400));
+    throw new CustomError("Access token is required", 400); // Directly throw error
   }
 
-  try {
-    // 1. Verify the access token with Google
-    const ticket = await client.verifyIdToken({
-      idToken: accessToken,
-      audience: process.env.GOOGLE_CLIENT_ID, // Specify the Google client ID
+  // 1. Verify the access token with Google
+  const ticket = await client.verifyIdToken({
+    idToken: accessToken,
+    audience: process.env.GOOGLE_CLIENT_ID, // Specify the Google client ID
+  });
+
+  // 2. Extract user info from the token
+  const payload = ticket.getPayload();
+  const { email, name, picture } = payload; // You can add other fields if needed
+
+  // 3. Check if user already exists in your database
+  let user = await User.findOne({ email });
+
+  if (!user) {
+    // 4. If the user doesn't exist, you can create a new user or throw an error.
+    user = new User({
+      email,
+      username: name, // Set username as user's Google name or something else
+      picture, // Optional, store the user's Google profile picture
+      google: true, // Add a field indicating that this user signed up via Google
     });
-
-    // 2. Extract user info from the token
-    const payload = ticket.getPayload();
-    const { email, name, picture } = payload; // You can add other fields if needed
-
-    // 3. Check if user already exists in your database
-    let user = await User.findOne({ email });
-
-    if (!user) {
-      // 4. If the user doesn't exist, you can create a new user or throw an error.
-      user = new User({
-        email,
-        username: name, // Set username as user's Google name or something else
-        picture, // Optional, store the user's Google profile picture
-        google: true, // Add a field indicating that this user signed up via Google
-      });
-      await user.save(); // Save the new user in the database
-    }
-
-    // 5. Generate a JWT token for the authenticated user
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h", // Set the expiration as needed
-    });
-
-    // 6. Respond with the JWT token
-    res.status(200).json({ token });
-  } catch (error) {
-    console.error(error);
-    return next(new CustomError("Failed to authenticate with Google", 500));
-  }
-};
-
-
-
-
-const updateProfile = async (req, res, next) => {
-  const { username } = req.body;
-
-  // Validate that username is provided
-  if (!username) {
-    return next(new CustomError("Username is required", 400)); // Bad request
+    await user.save(); // Save the new user in the database
   }
 
-  try {
-    // Find the user in the database and update the username
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user, // The user ID from the token
-      { username }, // Only update the username
-      { new: true, runValidators: true } // Return the updated user and run validators
-    );
+  // 5. Generate a JWT token for the authenticated user
+  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "1h", // Set the expiration as needed
+  });
 
-    if (!updatedUser) {
-      return next(new CustomError("User not found", 404)); // User not found
-    }
-
-    // Return the updated profile
-    res.status(200).json({
-      updatedProfile: {
-        userId: updatedUser._id,
-        username: updatedUser.username,
-        email: updatedUser.email,
-      },
-    });
-  } catch (err) {
-    next(err); // Pass any errors to error handler
-  }
-};
+  // 6. Respond with the JWT token
+  res.status(200).json({ token });
+});
 
 
 // check about custome error handling sing we are using it here      in the above functions.
-
-
 
 module.exports = {
   registerUser,
@@ -276,5 +280,4 @@ module.exports = {
   requestPasswordReset,
   resetPassword,
   googleLogin,
-  updateProfile,
 };

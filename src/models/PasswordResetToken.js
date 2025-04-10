@@ -8,7 +8,7 @@ const passwordResetTokenSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    token: { type: String, required: true },
+    token: { type: String, required: true, unique: true},
     expiresAt: { type: Date, required: true },
   },
   { timestamps: true }
@@ -20,3 +20,4 @@ const PasswordResetToken = mongoose.model(
 );
 
 module.exports = PasswordResetToken;
+

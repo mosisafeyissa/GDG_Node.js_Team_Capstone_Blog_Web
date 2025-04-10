@@ -5,4 +5,4 @@ const sendResetEmail = (email, resetToken) => {
   console.log(`Sent to: ${email}`);
 };
 
-module.exports = sendResetEmail;
+module.exports = sendResetEmail; 

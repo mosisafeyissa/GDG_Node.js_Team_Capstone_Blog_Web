@@ -1,12 +1,12 @@
 //path to this file is src/controllers/blogController.js
 const asyncHandler =require("express-async-handler");
-const blog = require("../models/BlogPost")
+const Blog = require("../models/BlogPost")
 //desc get all blogs
 //route GET /api/blogs
 //access Public
 
 const getBlogs = asyncHandler(async (req ,res)=>{
-  const blogs = await blog.find();
+  const blogs = await Blog.find();
     res.status(200).json(blogs)
   });
 
@@ -15,7 +15,7 @@ const getBlogs = asyncHandler(async (req ,res)=>{
 //access Public
 
 const getBlog = asyncHandler(async(req ,res)=>{
-  const blogs = await blog.findById(req.params.id)
+  const blogs = await Blog.findById(req.params.id)
   
   if(!blogs){
     res.status(404);
@@ -36,7 +36,7 @@ const createBlog = asyncHandler(async (req,res)=>{
         res.status(400);
         throw new Error("all fields must be filled")
     }
-    const blogs = await blog.create({
+    const blogs = await Blog.create({
       title,
       content,
       category,
@@ -48,24 +48,34 @@ const createBlog = asyncHandler(async (req,res)=>{
 //desc update blog
 //route PUT /api/blogs/:id
 //access Public
-const updateBlog = asyncHandler(async (req,res)=>{
-    const userId = req.userId
-    const blogId = req.params.id
-  const blogs = await blog.findById(blogId)
-  if(!blogs){
-    res.status(404);
-    throw new Error("blog not found!")
+const updateBlog = asyncHandler(async (req, res) => {
+  const userId = req.userId; // Set by your `protect` middleware
+  const blogId = req.params.id;
+
+  // 1. Find the blog post
+  const blog = await Blog.findById(blogId);
+
+  if (!blog) {
+    throw new CustomError("Blog not found", 404);
   }
-  if(blog.author != userId){
-   return res.status(400).json({message:"unauthorized - invalid blog Id"})
+
+  // 2. Check if the logged-in user is the author
+  if (blog.author.toString() !== userId) {
+    return res
+      .status(403)
+      .json({ message: "Unauthorized: Not your blog post" });
   }
-  const updatedBlog = await blog.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    {new: true}
-  )
-    res.status(200).json(updatedBlog);
-  });
+
+  // 3. Update the blog fields only if they're sent in the request
+  blog.title = req.body.title || blog.title;
+  blog.content = req.body.content || blog.content;
+  blog.category = req.body.category || blog.category;
+
+  const updatedBlog = await blog.save();
+
+  // 4. Return updated blog
+  res.status(200).json(updatedBlog);
+});
 
 //desc delete blog
 //route DELETE /api/blogs
@@ -75,17 +85,28 @@ const deleteBlog = asyncHandler(async (req,res)=>{
   try {
     const userId = req.userId
     const blogId = req.params.id
-    if(blog.author != userId){
-      return res.status(400).json({message:"unauthorized - invalid blog Id"})
+
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+       return res.status(404).json({ message: "Blog not found" });
     }
-  
-    await blog.findByIdAndDelete(blogId)
-    res.status(200).json({message : "blog deleted"})
+
+     // 2. Check if the current user is the author
+    if (blog.author.toString() !== userId) {
+       return res.status(403).json({ message: "Unauthorized - not your blog" });
+    }
+
+     // 3. Delete the blog post
+     await blog.deleteOne();
+
+     // 4. Respond to client
+     res.status(200).json({ message: "Blog deleted successfully" });
   } catch (error) {
     console.log("error in delete post controller" , error.message)
     res.status(500).json({message:"Internal server error"})
   }
   });
+
   module.exports = {
     getBlogs,
     getBlog,

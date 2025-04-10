@@ -18,7 +18,7 @@ const {
 
 router
   .route("/")
-  .get(protect, getBlogs)
+  .get(getBlogs)
   .post(
     protect,
     validateBlogPost,
@@ -29,7 +29,7 @@ router
 
 router
   .route("/:id")
-  .get(protect, getBlog)
+  .get(getBlog)
   .put(protect, validateBlogPost, handleValidationErrors, updateBlog)
   .delete(protect, verifyToken, deleteBlog);
 
