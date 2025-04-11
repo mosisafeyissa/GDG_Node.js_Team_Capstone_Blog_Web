@@ -1,6 +1,6 @@
 # GDG Node.js Course: Blogging Website Backend
 
-Welcome to the **GDG Node.js Course**! This project is a mini-project designed for Node.js beginners to help you understand the fundamentals of building a backend for a blogging website. Below, you'll find an overview of the project structure, key concepts, and instructions to get started.
+Welcome to the **GDG Node.js Course: Blogging Website Backend**! This project is a mini-project designed for Node.js beginners to help you understand the fundamentals of building a backend for a blogging website. Below, you'll find an overview of the project structure, key concepts, and instructions to get started.
 
 ---
 
@@ -29,7 +29,15 @@ Create a `.env` file in the root of your project to store environment variables.
 
 Example `.env` file:
 ```env
-PORT=3000
+PORT=3000                       # Port number for the server to listen on
+JWT_SECRET=your-secret-here     # Secret key for JWT authentication
+TOKEN_EXPIRE_IN=1h              # Expiration time for the JWT token (adjust as needed)
+GOOGLE_CLIENT_ID=                # Your Google OAuth client ID
+GOOGLE_CLIENT_SECRET=            # Your Google OAuth client secret
+MONGO_URI=                       # Connection string for your MongoDB database
+BASE_URL=                        # Base URL for your application (e.g., http://localhost:3000)
+EMAIL_USER=                      # Email address for sending emails
+EMAIL_PASS=                      # Password for the email account
 ```
 
 ---
@@ -66,26 +74,37 @@ Utils (utilities) are helper functions or modules that provide reusable function
 
 ```
 .
-├── .prettierrc           # Prettier configuration
-├── eslint.config.js      # ESLint configuration
-├── index.js              # Entry point of the application
-├── jsconfig.json         # JavaScript configuration
-├── package.json          # Project metadata and dependencies
-├── package-lock.json     # npm lockfile for dependency management
-├── README.md             # Project documentation
-└── src                   # Source code directory
-    ├── middleware        # Custom middleware functions
-    │   └── index.js      # Main middleware file
-    ├── controllers       # Controllers for handling route logic
-    │   └── index.js      # Main controller file
-    ├── models            # Database models
-    │   └── index.js      # Main model file
-    ├── routes            # Route definitions
-    │   └── index.js      # Main route file
-    ├── services          # Business logic and service layer
-    │   └── index.js      # Main service file
-    └── utils             # Utility functions and helpers
-        └── logger.js     # Logger utility
+.
+├── app.js                        # Entry point of the application
+├── package.json                  # Project metadata and dependencies
+├── package-lock.json             # npm lockfile for dependency management
+├── README.md                     # Project documentation
+├── .gitignore                    # Specifies files and directories to be ignored by Git
+└── src                           # Source code directory
+    ├── config                    # Configuration files
+    │   └── db.js                 # Database connection setup
+    ├── middleware                # Custom middleware functions
+    │   ├── authMiddleware.js       # Middleware for authentication
+    │   ├── errorMiddleware.js      # Middleware for error handling
+    │   └── validationMiddleware.js # Middleware for request validation
+    ├── controllers                 # Controllers for handling route logic
+    │   ├── authController.js       # Logic for user authentication
+    │   ├── blogController.js       # Logic for managing blog posts
+    │   └── profileController.js    # Logic for user profiles
+    ├── models                      # Database models
+    │   ├── BlogPost.js             # Blog post model
+    │   ├── PasswordResetToken.js   # Password reset token model
+    │   └── User.js                 # User model
+    ├── routes                    # Route definitions
+    │   ├── authRoutes.js         # Routes for authentication
+    │   ├── blogRoutes.js         # Routes for blog posts
+    │   └── profileRoutes.js      # Routes for user profiles
+    ├── services                  # Business logic and service layer
+    │   ├── generateToken.js      # Token generation logic
+    │   ├── sendEmail.js          # Email sending logic
+    │   └── tokenService.js       # Token management services
+    └── utils                     # Utility functions and helpers
+        └── customError.js        # Custom error handling utility    
 ```
 
 ---
@@ -94,8 +113,8 @@ Utils (utilities) are helper functions or modules that provide reusable function
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/gdg-nodejs-course.git
-   cd gdg-nodejs-course
+   git clone https://github.com/mosisafeyissa/GDG_Node.js_Team_Capstone_Blog_Web.git
+   cd GDG_Node.js_Team_Capstone_Blog_Web
    ```
 
 2. Install dependencies:
@@ -128,15 +147,23 @@ Contributions are welcome! If you'd like to contribute to this project, please f
 
 ---
 
-## Example API Endpoints
+## API Endpoints
 
-Here are some example endpoints you might implement in this project:
+Here are the list of endpoints being implemented in this project:
 
-- **GET /posts**: Fetch all blog posts.
-- **GET /posts/:id**: Fetch a single blog post by ID.
-- **POST /posts**: Create a new blog post.
-- **PUT /posts/:id**: Update an existing blog post.
-- **DELETE /posts/:id**: Delete a blog post.
+- **POST ```/api/auth/register```**: (Request-body: none { email, username, password }) -- Register a user.
+- **POST ```/api/auth/login```**: (Request-body: { email, password }) -- Log in.
+- **GET ```/posts/```**: (Request-body: none) -- Fetch all blog posts.
+- **GET ```/posts/:id```**:(Request-body: none) Fetch a single blog post by ID.
+- **POST ```/posts```**: (Request-body: { title, content, category(optional) }) Create a new blog post.
+- **PUT ```/posts/:id```**: (Request-body: { title, content, category }) Update an existing blog post.
+- **DELETE ```/posts/:id```**: (Request-body: none) Delete a blog post.
+- **POST ```/api/auth/logout```**: (Request-body: None (JWT in header)) -- Log out a user
+- **POST ```/api/auth/reset-password/request```**: (Request-body: { email }) -- Request password reset
+- **POST ```/api/auth/reset-password```**: (Request-body: { token, newPassword }) -- Reset password
+- **POST ```/api/auth/google```: (Request-body: { accessToken }) -- Third-party login (Google)
+- **GET ```/api/profile```: (Request-body: None (JWT in header)) -- Get user profile
+- **PUT ```/api/profile```:(Request-body: { username , email}) -- Update user profile
 
 ---
 
