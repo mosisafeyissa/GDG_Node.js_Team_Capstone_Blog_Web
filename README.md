@@ -4,6 +4,9 @@ Welcome to the **GDG Node.js Course: Blogging Website Backend**! This project is
 
 ---
 
+## Deployed API Link
+```https://gdg-node-team-capstone-blog-web-backend.onrender.com```
+
 ## Table of Contents
 1. [Setting Up](#setting-up)
 2. [Key Concepts](#key-concepts)
@@ -103,8 +106,10 @@ Utils (utilities) are helper functions or modules that provide reusable function
     │   ├── generateToken.js      # Token generation logic
     │   ├── sendEmail.js          # Email sending logic
     │   └── tokenService.js       # Token management services
-    └── utils                     # Utility functions and helpers
-        └── customError.js        # Custom error handling utility    
+    ├── utils                     # Utility functions and helpers
+    │    └── customError.js        # Custom error handling utility    
+    └── views                     # Utility functions and helpers
+        └── home.ejs              # Home page which give info about the project 
 ```
 
 ---
@@ -166,6 +171,24 @@ Here are the list of endpoints being implemented in this project:
 - **PUT ```/api/profile```**:(Request-body: { username , email}) -- Update user profile
 
 ---
+## Dependencies
+**bcrypt / bcryptjs**	Hashing user passwords securely
+**body-parser**	Parsing incoming request bodies (JSON, URL-encoded)
+**compression**	Compressing HTTP responses (improves performance)
+**cookie-parser**	Parsing cookies attached to client requests
+**cors**	Handling Cross-Origin Resource Sharing (CORS)
+**dotenv**	Loading environment variables from .env files
+**ejs**	Rendering dynamic HTML templates from the server
+**express**	Core web framework for handling routes, requests, and responses
+**express-async-handler**	Wrapper for clean error handling in async Express routes
+**express-validator**	Middleware for validating and sanitizing inputs
+**google-auth-library**	Google OAuth 2.0 authentication integration
+**helmet**	Securing HTTP headers to protect the app from common vulnerabilities
+**jsonwebtoken**	Creating and verifying JWT tokens for authentication
+**mongoose**	Modeling and querying MongoDB with schemas
+**morgan**	Logging HTTP requests to the console (useful for debugging)
+**multer**	Handling multipart/form-data (used for uploading files/images)
+**nodemailer**	Sending emails (e.g., for password resets)
 
 ## License
 
@@ -173,4 +196,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ---
 
-Happy coding! 🚀
+Happy coding! GDG Node.js Team-2 🚀
