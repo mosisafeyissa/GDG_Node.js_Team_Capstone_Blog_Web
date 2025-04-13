@@ -3,7 +3,6 @@ require('dotenv').config();
 const express = require('express');
 const connectDB = require('./src/config/db');
 const bodyParser = require("body-parser");
-const path = require("path");
 
 
 const app = express();
