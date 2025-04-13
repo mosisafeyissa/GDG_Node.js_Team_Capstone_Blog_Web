@@ -13,12 +13,19 @@ connectDB();
 app.use(express.json());
 app.use(bodyParser.json());
 
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname,"src","views"));
+
+app.get("/", (req, res) => {
+  res.render("home");
+});
+
 app.use("/api/auth", require("./src/routes/authRoutes"));
 app.use("/api/posts", require("./src/routes/blogRoutes"));
 app.use("/api/profile", require("./src/routes/profileRoutes"));
 
-app.get("/test-error", (req, res) => {
-  throw new CustomError("Test error", 500);
+app.use("*", (req, res) => {
+  res.status(404).json({ message: "Route not found" });
 });
 
 const errorHandler = require("./src/middleware/errorMiddleware");

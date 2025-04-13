@@ -20,6 +20,7 @@
     "cors": "^2.8.5",
     "cros": "^1.0.1",
     "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-async-handler": "^1.2.0",
     "express-validator": "^7.2.1",

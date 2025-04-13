@@ -8,7 +8,7 @@ const generatePasswordResetToken = () => {
     .update(resetToken)
     .digest('hex');
 
-  const expiresAt = Date.now() + 3600000; // 1 hour
+  const expiresAt = Date.now() + 3600000; 
   return { resetToken, hashedToken, expiresAt };
 };
 

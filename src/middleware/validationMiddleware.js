@@ -1,7 +1,6 @@
 // path to this file is src/middleware/validationMiddleware.js
 const { body, validationResult } = require('express-validator');
 
-// Validate user registration/login inputs
 const validateUser = [
   body('email').isEmail().withMessage('Invalid email format'),
   body('password')
@@ -12,14 +11,12 @@ const validateUser = [
   .trim(),
 ];
 
-// Validate blog post creation/update inputs
 const validateBlogPost = [
   body('title').notEmpty().withMessage('Title is required'),
   body('content').notEmpty().withMessage('Content is required'),
   body('category').optional().trim(),
 ];
 
-// Handle validation errors
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {

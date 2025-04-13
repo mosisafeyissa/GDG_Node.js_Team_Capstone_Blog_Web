@@ -29,7 +29,6 @@ const getBlog = asyncHandler(async(req ,res)=>{
 //access Public
 const createBlog = asyncHandler(async (req,res)=>{
 
-  // req.user from authMiddleware
     console.log("the request body is: ", req.body)
     const {title, content, category} = req.body;
     if(!title|| !content  ){
@@ -49,31 +48,27 @@ const createBlog = asyncHandler(async (req,res)=>{
 //route PUT /api/blogs/:id
 //access Public
 const updateBlog = asyncHandler(async (req, res) => {
-  const userId = req.userId; // Set by your `protect` middleware
+  const userId = req.userId; 
   const blogId = req.params.id;
 
-  // 1. Find the blog post
   const blog = await Blog.findById(blogId);
 
   if (!blog) {
     throw new CustomError("Blog not found", 404);
   }
 
-  // 2. Check if the logged-in user is the author
   if (blog.author.toString() !== userId) {
     return res
       .status(403)
       .json({ message: "Unauthorized: Not your blog post" });
   }
 
-  // 3. Update the blog fields only if they're sent in the request
   blog.title = req.body.title || blog.title;
   blog.content = req.body.content || blog.content;
   blog.category = req.body.category || blog.category;
 
   const updatedBlog = await blog.save();
 
-  // 4. Return updated blog
   res.status(200).json(updatedBlog);
 });
 
@@ -91,15 +86,12 @@ const deleteBlog = asyncHandler(async (req,res)=>{
        return res.status(404).json({ message: "Blog not found" });
     }
 
-     // 2. Check if the current user is the author
     if (blog.author.toString() !== userId) {
        return res.status(403).json({ message: "Unauthorized - not your blog" });
     }
 
-     // 3. Delete the blog post
      await blog.deleteOne();
 
-     // 4. Respond to client
      res.status(200).json({ message: "Blog deleted successfully" });
   } catch (error) {
     console.log("error in delete post controller" , error.message)

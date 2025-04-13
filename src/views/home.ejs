@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GDG Node.js Blog API</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f9;
+      padding: 2rem;
+      color: #333;
+    }
+    h1, h2 {
+      color: #2c3e50;
+    }
+    code {
+      background: #eee;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    ul {
+      padding-left: 1.5rem;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    section {
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to the GDG Node.js Course: Blogging Website Backend</h1>
+
+  <section>
+    <p>This is a mini-project built during the GDG Node.js Course. It's a simple backend for a blogging website, designed to help beginners understand real-world Node.js development using Express, MongoDB, and more.</p>
+  </section>
+
+  <section>
+    <h2>🚀 Key Features</h2>
+    <ul>
+      <li>Authentication (Register, Login, Logout, Password Reset, Google OAuth)</li>
+      <li>Blog Post CRUD (Create, Read, Update, Delete)</li>
+      <li>JWT-based user authorization</li>
+      <li>User profile management</li>
+      <li>Code formatting with Prettier and linting with ESLint</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>🔧 Project Structure</h2>
+    <ul>
+      <li><code>app.js</code> – Entry point</li>
+      <li><code>src/routes</code> – Route definitions</li>
+      <li><code>src/controllers</code> – Route logic</li>
+      <li><code>src/services</code> – Business logic</li>
+      <li><code>src/utils</code> – Helper functions</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>📬 API Endpoints</h2>
+    <ul>
+      <li><code>POST</code> /api/auth/register – Register a user</li>
+      <li><code>POST</code> /api/auth/login – Login</li>
+      <li><code>POST</code> /api/auth/logout – Logout</li>
+      <li><code>POST</code> /api/auth/reset-password/request – Request password reset</li>
+      <li><code>POST</code> /api/auth/reset-password – Reset password</li>
+      <li><code>POST</code> /api/auth/google – Google OAuth login</li>
+      <li><code>GET</code> /api/profile – Get user profile</li>
+      <li><code>PUT</code> /api/profile – Update user profile</li>
+      <li><code>GET</code> /posts – Get all blog posts</li>
+      <li><code>GET</code> /posts/:id – Get a blog post by ID</li>
+      <li><code>POST</code> /posts – Create a blog post</li>
+      <li><code>PUT</code> /posts/:id – Update a blog post</li>
+      <li><code>DELETE</code> /posts/:id – Delete a blog post</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>👥 Contributing</h2>
+    <p>Fork the repo → Make changes in a new branch → Push and open a Pull Request</p>
+  </section>
+
+  <footer>
+    <hr>
+    <p>Happy Coding! 🎉 — <strong>GDG Node.js Team-2</strong></p>
+  </footer>
+</body>
+</html>

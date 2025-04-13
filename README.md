@@ -161,9 +161,9 @@ Here are the list of endpoints being implemented in this project:
 - **POST ```/api/auth/logout```**: (Request-body: None (JWT in header)) -- Log out a user
 - **POST ```/api/auth/reset-password/request```**: (Request-body: { email }) -- Request password reset
 - **POST ```/api/auth/reset-password```**: (Request-body: { token, newPassword }) -- Reset password
-- **POST ```/api/auth/google```: (Request-body: { accessToken }) -- Third-party login (Google)
-- **GET ```/api/profile```: (Request-body: None (JWT in header)) -- Get user profile
-- **PUT ```/api/profile```:(Request-body: { username , email}) -- Update user profile
+- **POST ```/api/auth/google```**: (Request-body: { accessToken }) -- Third-party login (Google)
+- **GET ```/api/profile```**: (Request-body: None (JWT in header)) -- Get user profile
+- **PUT ```/api/profile```**:(Request-body: { username , email}) -- Update user profile
 
 ---
 

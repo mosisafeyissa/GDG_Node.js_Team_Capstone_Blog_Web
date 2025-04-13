@@ -23,23 +23,19 @@ const CustomError = require("../utils/CustomError"); // Import the CustomError c
 const registerUser = asyncHandler(async (req, res) => {
   const { email, username, password } = req.body;
 
-  // Validate input fields
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     throw new CustomError("Enter valid inputs", 400, errors.array());
   }
 
-  // Check if email or username already exists
   const existingUser = await User.findOne({ $or: [{ email }, { username }] });
   if (existingUser) {
     throw new CustomError("An account already exists for this email address.", 400);
   }
 
-  // Hash the password
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = bcrypt.hashSync(password, salt);
 
-  // Create and save the user
   const newUser = new User({
     email,
     username,
@@ -66,38 +62,31 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  // Validate input fields
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     throw new CustomError("Enter valid Inputs", 400, errors.array());
   }
 
   try {
-    // Step 1: Find user by email
     const user = await User.findOne({ email });
     if (!user) {
       throw new CustomError("User doesn't exist", 401);
     }
 
-    // Step 2: Compare password
     const passwordIsValid = bcrypt.compareSync(password, user.password);
     if (!passwordIsValid) {
       return res.status(401).json({ message: "Incorrect password." });
     }
 
-    // Step 3: Generate JWT token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
 
-    // Step 4: Send response with token
     res.status(200).json({ token });
   } catch (err) {
-    // Handle known errors (CustomError)
     if (err instanceof CustomError) {
       res.status(err.statusCode || 400).json({ message: err.message });
     } else {
-      // Catch other errors (e.g., server errors)
       console.error(err);
       res
         .status(500)
@@ -156,7 +145,6 @@ const requestPasswordReset = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Delete existing token if it exists
     await PasswordResetToken.deleteMany({ userId: user._id });
 
     const rawToken = crypto.randomBytes(32).toString("hex");
@@ -165,7 +153,7 @@ const requestPasswordReset = async (req, res, next) => {
       .update(rawToken)
       .digest("hex");
 
-    const expiresAt = Date.now() + 60 * 60 * 1000; // 1 hour
+    const expiresAt = Date.now() + 60 * 60 * 1000; 
 
     await PasswordResetToken.create({
       userId: user._id,
@@ -173,7 +161,7 @@ const requestPasswordReset = async (req, res, next) => {
       expiresAt,
     });
 
-    await sendPasswordResetEmail(user, rawToken); // send raw token via email
+    await sendPasswordResetEmail(user, rawToken); 
 
     res.status(200).json({ message: "Password reset email sent" });
   } catch (err) {
@@ -231,47 +219,39 @@ const resetPassword = async (req, res, next) => {
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const googleLogin = asyncHandler(async (req, res, next) => {
-  const { accessToken } = req.body; // The access token sent by the frontend
+  const { accessToken } = req.body; 
 
   if (!accessToken) {
-    throw new CustomError("Access token is required", 400); // Directly throw error
+    throw new CustomError("Access token is required", 400); 
   }
 
-  // 1. Verify the access token with Google
   const ticket = await client.verifyIdToken({
     idToken: accessToken,
-    audience: process.env.GOOGLE_CLIENT_ID, // Specify the Google client ID
+    audience: process.env.GOOGLE_CLIENT_ID,
   });
 
-  // 2. Extract user info from the token
   const payload = ticket.getPayload();
-  const { email, name, picture } = payload; // You can add other fields if needed
+  const { email, name, picture } = payload; 
 
-  // 3. Check if user already exists in your database
   let user = await User.findOne({ email });
 
   if (!user) {
-    // 4. If the user doesn't exist, you can create a new user or throw an error.
     user = new User({
       email,
-      username: name, // Set username as user's Google name or something else
-      picture, // Optional, store the user's Google profile picture
-      google: true, // Add a field indicating that this user signed up via Google
+      username: name, 
+      picture, 
+      google: true, 
     });
-    await user.save(); // Save the new user in the database
+    await user.save(); 
   }
 
-  // 5. Generate a JWT token for the authenticated user
   const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-    expiresIn: "1h", // Set the expiration as needed
+    expiresIn: "1h", 
   });
 
-  // 6. Respond with the JWT token
   res.status(200).json({ token });
 });
 
-
-// check about custome error handling sing we are using it here      in the above functions.
 
 module.exports = {
   registerUser,
