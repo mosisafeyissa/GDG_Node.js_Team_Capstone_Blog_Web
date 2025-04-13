@@ -1,41 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>GDG Node.js Blog API</title>
+  <title>GDG Node.js Blog API Capstone</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f4f6f9;
-      padding: 2rem;
-      color: #333;
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      background: #f9f9f9;
     }
     h1, h2 {
       color: #2c3e50;
     }
-    code {
+    code, pre {
       background: #eee;
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
-    ul {
-      padding-left: 1.5rem;
-    }
-    li {
-      margin-bottom: 8px;
+      padding: 8px;
+      display: block;
+      border-radius: 5px;
+      margin: 10px 0;
     }
     section {
-      margin-bottom: 2rem;
+      margin-bottom: 40px;
+    }
+    .method {
+      font-weight: bold;
+      color: #27ae60;
     }
   </style>
 </head>
 <body>
+
   <h1>Welcome to the GDG Node.js Course: Blogging Website Backend</h1>
 
   <section>
     <p>This is a mini-project built during the GDG Node.js Course. It's a simple backend for a blogging website, designed to help beginners understand real-world Node.js development using Express, MongoDB, and more.</p>
   </section>
-
+    <p>This page provides information about available endpoints, request bodies, dependencies, and setup instructions.</p>
   <section>
     <h2>🚀 Key Features</h2>
     <ul>
@@ -58,26 +57,136 @@
     </ul>
   </section>
 
+  
+
   <section>
-    <h2>📬 API Endpoints</h2>
-    <ul>
-      <li><code>POST</code> /api/auth/register – Register a user</li>
-      <li><code>POST</code> /api/auth/login – Login</li>
-      <li><code>POST</code> /api/auth/logout – Logout</li>
-      <li><code>POST</code> /api/auth/reset-password/request – Request password reset</li>
-      <li><code>POST</code> /api/auth/reset-password – Reset password</li>
-      <li><code>POST</code> /api/auth/google – Google OAuth login</li>
-      <li><code>GET</code> /api/profile – Get user profile</li>
-      <li><code>PUT</code> /api/profile – Update user profile</li>
-      <li><code>GET</code> /posts – Get all blog posts</li>
-      <li><code>GET</code> /posts/:id – Get a blog post by ID</li>
-      <li><code>POST</code> /posts – Create a blog post</li>
-      <li><code>PUT</code> /posts/:id – Update a blog post</li>
-      <li><code>DELETE</code> /posts/:id – Delete a blog post</li>
-    </ul>
+    <h2>🚀 Local Setup</h2>
+    <pre><code>git clone https://github.com/mosisafeyissa/GDG_Node.js_Team_Capstone_Blog_Web
+cd GDG_Node.js_Team_Capstone_Blog_Web
+npm install
+Create a .env file with your variables (see example below)
+npm run dev</code></pre>
+
+    <h3>Example `.env` file:</h3>
+    <pre><code>PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_secret_key
+CLIENT_URL=http://localhost:5000
+EMAIL_USER=your_email@example.com
+EMAIL_PASS=your_email_password
+GOOGLE_CLIENT_ID=your_google_oauth_id</code></pre>
   </section>
 
   <section>
+    <h2>📡 API Endpoints & Request Bodies</h2>
+
+    <h3>🔐 Auth Routes</h3>
+
+    <p><strong>1. Register a new user</strong></p>
+    <p><span class="method">POST</span> /api/auth/register</p>
+    <pre><code>{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "securePassword"
+}</code></pre>
+
+    <p><strong>2. Login with email and password</strong></p>
+    <p><span class="method">POST</span> /api/auth/login</p>
+    <pre><code>{
+  "email": "john@example.com",
+  "password": "securePassword"
+}</code></pre>
+
+    <p><strong>3. Request a password reset email</strong></p>
+    <p><span class="method">POST</span> /api/auth/reset-password/request</p>
+    <pre><code>{
+  "email": "john@example.com"
+}</code></pre>
+
+    <p><strong>4. Reset the password using token from email</strong></p>
+    <p><span class="method">POST</span> /api/auth/reset-password</p>
+    <pre><code>{
+  "token": "resetToken123",
+  "newPassword": "newSecurePassword"
+}</code></pre>
+
+    <p><strong>5. Login/Register using Google OAuth</strong></p>
+    <p><span class="method">POST</span> /api/auth/google</p>
+    <pre><code>{
+  "tokenId": "yourGoogleOAuthToken"
+}</code></pre>
+
+    <h3>📝 Blog Post Routes</h3>
+
+    <p><strong>6. Create a new blog post</strong></p>
+    <p><span class="method">POST</span> /api/posts</p>
+    <pre><code>{
+  "title": "My First Blog",
+  "content": "This is the content of the blog"
+}</code></pre>
+
+    <p><strong>7. Update an existing blog post</strong></p>
+    <p><span class="method">PUT</span> /api/posts/:id</p>
+    <pre><code>{
+  "title": "Updated Title",
+  "content": "Updated content"
+}</code></pre>
+
+    <p><strong>8. Delete a blog post</strong></p>
+    <p><span class="method">DELETE</span> /api/posts/:id</p>
+
+    <h3>👤 Profile Routes</h3>
+
+    <p><strong>9. Get the logged-in user's profile</strong></p>
+    <p><span class="method">GET</span> /api/profile</p>
+
+    <p><strong>10. Update the logged-in user's profile</strong></p>
+    <p><span class="method">PUT</span> /api/profile</p>
+    <pre><code>{
+  "name": "New Name",
+  "email": "newemail@example.com"
+}</code></pre>
+
+    <h3>📥 Comments and Likes</h3>
+
+    <p><strong>11. Add a comment to a blog post</strong></p>
+    <p><span class="method">POST</span> /api/posts/:id/comments</p>
+    <pre><code>{
+  "text": "This is a comment"
+}</code></pre>
+
+    <p><strong>12. Like a blog post</strong></p>
+    <p><span class="method">POST</span> /api/posts/:id/like</p>
+  </section>
+
+  <section>
+    <h2>📦 Dependencies & Usage</h2>
+    <ul>
+      <li><strong>bcrypt / bcryptjs</strong> – Hash passwords securely</li>
+      <li><strong>body-parser</strong> – Parse request bodies (JSON/form data)</li>
+      <li><strong>compression</strong> – Enable gzip compression for responses</li>
+      <li><strong>cookie-parser</strong> – Parse cookies (used in auth/session)</li>
+      <li><strong>dotenv</strong> – Load environment variables from `.env`</li>
+      <li><strong>ejs</strong> – Render HTML templates</li>
+      <li><strong>express</strong> – Build web server and API endpoints</li>
+      <li><strong>express-async-handler</strong> – Handle async errors in Express</li>
+      <li><strong>express-validator</strong> – Validate user inputs</li>
+      <li><strong>google-auth-library</strong> – Google OAuth login</li>
+      <li><strong>helmet</strong> – Secure app by setting HTTP headers</li>
+      <li><strong>jsonwebtoken</strong> – Handle JWT authentication</li>
+      <li><strong>mongoose</strong> – Interact with MongoDB using schema models</li>
+      <li><strong>morgan</strong> – Log HTTP requests to the console</li>
+      <li><strong>multer</strong> – Upload files/images to server</li>
+      <li><strong>nodemailer</strong> – Send emails (e.g., password reset)</li>
+      <li><strong>uuid</strong> – Generate unique IDs for tokens, file names, etc.</li>
+    </ul>
+
+    <h3>🔧 Dev Dependencies</h3>
+    <ul>
+      <li><strong>nodemon</strong> – Auto-restarts server when code changes (development only)</li>
+    </ul>
+  </section>
+    <section>
     <h2>👥 Contributing</h2>
     <p>Fork the repo → Make changes in a new branch → Push and open a Pull Request</p>
   </section>
@@ -86,5 +195,6 @@
     <hr>
     <p>Happy Coding! 🎉 — <strong>GDG Node.js Team-2</strong></p>
   </footer>
+
 </body>
 </html>
