@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const connectDB = require('./src/config/db');
 const bodyParser = require("body-parser");
+const path = require("path");
 
 
 const app = express();
@@ -24,8 +25,12 @@ app.use("/api/auth", require("./src/routes/authRoutes"));
 app.use("/api/posts", require("./src/routes/blogRoutes"));
 app.use("/api/profile", require("./src/routes/profileRoutes"));
 
-app.use("*", (req, res) => {
-  res.status(404).json({ message: "Route not found" });
+app.use((req, res, next) => {
+  res
+    .status(404)
+    .json({
+      message: `Cannot ${req.method} ${req.originalUrl} - Route not found`,
+    });
 });
 
 const errorHandler = require("./src/middleware/errorMiddleware");
