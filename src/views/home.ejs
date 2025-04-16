@@ -135,28 +135,27 @@ GOOGLE_CLIENT_ID=your_google_oauth_id</code></pre>
     <p><strong>8. Delete a blog post</strong></p>
     <p><span class="method">DELETE</span> /api/posts/:id</p>
 
+    <p><strong>9. Fetch all blog posts</strong></p>
+    <p><span class="method">GET</span> /api/posts</p>
+
+    <p><strong>10. Fetch a single blog post by ID</strong></p>
+    <p><span class="method">GET</span> /api/posts/:id</p>
+
     <h3>👤 Profile Routes</h3>
 
-    <p><strong>9. Get the logged-in user's profile</strong></p>
+    <p><strong>11. Get the logged-in user's profile</strong></p>
     <p><span class="method">GET</span> /api/profile</p>
 
-    <p><strong>10. Update the logged-in user's profile</strong></p>
+    <p><strong>12. Update the logged-in user's profile</strong></p>
     <p><span class="method">PUT</span> /api/profile</p>
     <pre><code>{
   "name": "New Name",
   "email": "newemail@example.com"
 }</code></pre>
 
-    <h3>📥 Comments and Likes</h3>
+    <p><strong>13. Log out a user</strong></p>
+    <p><span class="method">PUT</span> /api/auth/logout</p>    
 
-    <p><strong>11. Add a comment to a blog post</strong></p>
-    <p><span class="method">POST</span> /api/posts/:id/comments</p>
-    <pre><code>{
-  "text": "This is a comment"
-}</code></pre>
-
-    <p><strong>12. Like a blog post</strong></p>
-    <p><span class="method">POST</span> /api/posts/:id/like</p>
   </section>
 
   <section>
